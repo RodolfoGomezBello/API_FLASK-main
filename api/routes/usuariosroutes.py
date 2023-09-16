@@ -18,4 +18,7 @@ usuarios_routes.route('/servers/join/<int:servidor_id>',methods=['POST'])(Usuari
 usuarios_routes.route('/servers/<int:servidor_id>/canales', methods=['GET'])(UsuarioController.obtener_canales_servidor)
 usuarios_routes.route('/servers/<int:servidor_id>/canales', methods=['POST'])(UsuarioController.crear_canal)
 #usuarios_routes.route('/servers/<int:servidor_id>/canales/<int:canal_id>/unirse', methods=['POST'])(UsuarioController.unirse_a_canal) todos los canales estan habilitados para participar
+usuarios_routes.route('/servers/<int:servidor_id>/canales/<int:canal_id>/mensajes', methods=['GET'])(UsuarioController.obtener_mensajes_canal)
+usuarios_routes.route('/servers/<int:servidor_id>/canales/<int:canal_id>/mensajes', methods=['POST'])(UsuarioController.enviar_mensaje)
+usuarios_routes.route('/servers/<int:servidor_id>/canales/<int:canal_id>/mensajes/<int:mensaje_id>', methods=['DELETE'])(UsuarioController.borrar_mensaje)
 

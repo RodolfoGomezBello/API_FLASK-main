@@ -98,3 +98,5 @@ class Canal:
 
         canales_obj = [Canal(id_canal=c[0], nombre=c[1], servidor_id=c[2], creador_id=c[3], icono=c[4]) for c in canales]
         return canales_obj
+
+

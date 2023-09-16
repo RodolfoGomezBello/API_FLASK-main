@@ -3,7 +3,7 @@ from flask import request, session, jsonify
 from ..models.exceptions import InvalidDataError, UsuarioNotFound
 from ..models.servidoresmodels import Servidor
 from ..models.canalesmodels import Canal
-
+from ..models.mensajesmodels import Mensaje
 
 class UsuarioController:
 
@@ -276,3 +276,49 @@ class UsuarioController:
             return jsonify({"message": "Usuario no encontrado"}), 404
 
     """
+
+    @classmethod
+    def obtener_mensajes_canal(cls, servidor_id, canal_id):
+        try:
+            # Implementa la lógica para obtener todos los mensajes de un canal
+            mensajes = Mensaje.obtener_mensajes_por_canal(canal_id)
+            return jsonify([mensaje.serializar() for mensaje in mensajes]), 200
+        except Exception as e:
+            return jsonify({"message": str(e)}), 500
+
+    @classmethod
+    def enviar_mensaje(cls, servidor_id, canal_id):
+        data = request.json
+        email = session.get('email')
+        usuario = Usuario.obtener_usuario_por_email_servidores(email=email)
+
+        if usuario:
+            try:
+                nuevo_mensaje = Mensaje.crear_mensaje(
+                    contenido=data.get('contenido'),
+                    canal_id=canal_id,
+                    usuario_id=usuario.id
+                )
+
+                return jsonify(nuevo_mensaje.serializar()), 201
+            except Exception as e:
+                return jsonify({"message": str(e)}), 500
+        else:
+            return jsonify({"message": "Usuario no encontrado"}), 404
+
+    @classmethod
+    def borrar_mensaje(cls, servidor_id, canal_id, mensaje_id):
+        email = session.get('email')
+        usuario = Usuario.obtener_usuario_por_email_servidores(email=email)
+
+        if usuario:
+            try:
+                if Mensaje.borrar_mensaje(mensaje_id, usuario.id):
+                    return jsonify({"message": "Mensaje eliminado exitosamente"}), 200
+                else:
+                    return jsonify({"message": "No tienes permiso para borrar este mensaje o ha pasado más de 1 minuto"}), 403
+            except Exception as e:
+                return jsonify({"message": str(e)}), 500
+        else:
+            return jsonify({"message": "Usuario no encontrado"}), 404
+

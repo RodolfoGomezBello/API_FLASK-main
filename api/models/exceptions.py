@@ -28,3 +28,6 @@ class InvalidDataError(CustomException):
     def __init__(self, description):
         super().__init__(status_code=400, name="Invalid Data", description=description)   
 
+class MensajeNotFound(CustomException):
+    def __init__(self, description):
+        super().__init__(status_code=401, name="Message Not Found", description=description)

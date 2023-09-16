@@ -2,6 +2,9 @@ from ..models.usuariosmodels import Usuario #, agregar_usuario,obtener_usuario_p
 from flask import request, session, jsonify
 from ..models.exceptions import InvalidDataError, UsuarioNotFound
 from ..models.servidoresmodels import Servidor
+from ..models.canalesmodels import Canal
+
+
 class UsuarioController:
 
     """Usuario controller class"""
@@ -210,3 +213,66 @@ class UsuarioController:
            return jsonify([servidor.serializar() for servidor in servidores]), 200
         except Exception as e:
            return jsonify({"message": str(e)}), 500
+
+
+    @classmethod
+    def obtener_canales_servidor(cls, servidor_id):
+        email = session.get('email')
+        usuario = Usuario.obtener_usuario_por_email_servidores(email=email)
+
+        if usuario:
+            try:
+                # Obtiene todos los canales del servidor
+                canales = Canal.obtener_canales_por_servidor(servidor_id)
+                return jsonify([canal.serializar() for canal in canales]), 200
+            except Exception as e:
+                return jsonify({"message": str(e)}), 500
+        else:
+            return jsonify({"message": "Usuario no encontrado"}), 404
+
+    @classmethod
+    def crear_canal(cls, servidor_id):
+        data = request.json
+        email = session.get('email')
+        usuario = Usuario.obtener_usuario_por_email_servidores(email=email)
+
+        if usuario:
+            try:
+                nuevo_canal = Canal.crear_canal(
+                    nombre=data.get('nombre'),
+                    servidor_id=servidor_id,
+                    creador_id=usuario.id,
+                    icono=data.get('icono')
+                )
+
+                Canal.unirse_a_canal(nuevo_canal.id_canal, usuario.id)
+
+                return jsonify(nuevo_canal.serializar()), 201
+            except Exception as e:
+                return jsonify({"message": str(e)}), 500
+        else:
+            return jsonify({"message": "Usuario no encontrado"}), 404
+
+    """ 
+    Para Aplicar este metodo debemos crear una tabla intermedia llamada usuarios_canales
+    @classmethod
+    def unirse_a_canal(cls, servidor_id, canal_id):
+        email = session.get('email')
+        usuario = Usuario.obtener_usuario_por_email_servidores(email=email)
+
+        if usuario:
+            try:
+                # Verificar si el usuario ya es miembro del canal
+                if Canal.verificar_pertenencia_a_canal(canal_id, usuario.id):
+                    return jsonify({"message": "Ya eres miembro de este canal"}), 400
+
+                # Unirse al canal existente
+                Canal.unirse_a_canal(canal_id, usuario.id)
+
+                return jsonify({"message": "Te has unido al canal exitosamente"}), 200
+            except Exception as e:
+                return jsonify({"message": str(e)}), 500
+        else:
+            return jsonify({"message": "Usuario no encontrado"}), 404
+
+    """

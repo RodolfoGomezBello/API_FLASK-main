@@ -10,3 +10,10 @@ usuarios_routes.route('/usuarios', methods=['POST'])(UsuarioController.create)
 usuarios_routes.route('/<int:usuario_id>', methods=['GET'])(UsuarioController.get)
 usuarios_routes.route('/', methods=['GET'])(UsuarioController.get_all)
 usuarios_routes.route('/usuarios/<int:usuario_id>', methods=['DELETE'])(UsuarioController.delete)
+usuarios_routes.route('/servers', methods=['GET'])(UsuarioController.obtener_servidores_usuario)
+usuarios_routes.route('/servers', methods=['POST'])(UsuarioController.crear_servidor)
+usuarios_routes.route('/servers/<int:servidor_id>', methods=['DELETE'])(UsuarioController.eliminar_relacion_servidor)
+usuarios_routes.route('/servers/all', methods=['GET'])(UsuarioController.obtener_todos_los_servidores)
+usuarios_routes.route('/servers/join/<int:servidor_id>',methods=['POST'])(UsuarioController.unirse_a_servidor_existente)
+
+

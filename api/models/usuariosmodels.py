@@ -84,3 +84,18 @@ class Usuario:
         return Usuario(id, nombre, apellido, email, contraseña, fecha_nacimiento, avatar).serializar()
             
      return None
+    
+    @classmethod
+    def obtener_usuario_por_email_servidores(cls, email):
+    # Buscar un usuario por dirección de correo electrónico en la base de datos
+     consulta = "SELECT * FROM socialchat.usuarios WHERE email = %s"
+     valores = (email,)
+            
+     usuario = DatabaseConnection.fetch_one(consulta, params=valores)
+            
+     if usuario:
+        id, nombre, apellido, email, contraseña, fecha_nacimiento, avatar = usuario
+        return Usuario(id, nombre, apellido, email, contraseña, fecha_nacimiento, avatar)
+            
+     return None
+

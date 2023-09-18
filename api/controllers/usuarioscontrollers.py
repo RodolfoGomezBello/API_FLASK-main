@@ -47,9 +47,9 @@ class UsuarioController:
         if cls.authenticate(usuario):
           session['email'] = email
           print(session)
-          return {"message": "Sesión iniciada"}, 200
+          return {"success":True,"message": "Sesión iniciada"}, 200
         else:
-          return {"message": "Correo electrónico o contraseña incorrectos"}, 401
+          return {"success":False,"message": "Correo electrónico o contraseña incorrectos"}, 401
     
     @classmethod
     def show_profile(cls):
@@ -59,7 +59,7 @@ class UsuarioController:
         if usuario:
             return jsonify(usuario), 200
         else:
-            return jsonify({"message": "Usuario no encontrado"}), 404
+            return jsonify({"success":False,"message": "Usuario no encontrado"}), 404
     
     @classmethod
     def logout(cls):
@@ -115,9 +115,9 @@ class UsuarioController:
                 print(servers)
                 return jsonify([servidor.serializar() for servidor in servers]), 200
             except Exception as e:
-                return jsonify({"message": str(e)}), 500
+                return jsonify({"success":False,"message": str(e)}), 500
         else:
-            return jsonify({"message": "Usuario no encontrado"}), 404
+            return jsonify({"success":False,"message": "Usuario no encontrado"}), 404
 
     @classmethod
     def crear_servidor(cls):

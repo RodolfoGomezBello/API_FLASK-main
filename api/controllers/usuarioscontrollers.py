@@ -245,7 +245,7 @@ class UsuarioController:
                     icono=data.get('icono')
                 )
 
-                Canal.unirse_a_canal(nuevo_canal.id_canal, usuario.id)
+               # Canal.unirse_a_canal(nuevo_canal.id_canal, usuario.id)
 
                 return jsonify(nuevo_canal.serializar()), 201
             except Exception as e:

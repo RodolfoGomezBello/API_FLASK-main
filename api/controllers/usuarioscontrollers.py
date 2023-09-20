@@ -62,6 +62,37 @@ class UsuarioController:
             return jsonify({"success":False,"message": "Usuario no encontrado"}), 404
     
     @classmethod
+    def update(cls):
+      data = request.json
+      email = session.get('email')
+
+      # Obtener el usuario por su dirección de correo electrónico
+      usuario = Usuario.obtener_usuario_por_email_servidores(email=email)
+
+      if usuario:
+          try:
+              # Actualizar los campos del usuario con los nuevos valores
+              if 'nombre' in data:
+                  usuario.nombre = data['nombre']
+              if 'apellido' in data:
+                  usuario.apellido = data['apellido']
+              if 'fecha_nacimiento' in data:
+                  usuario.fecha_nacimiento = data['fecha_nacimiento']
+              if 'avatar' in data:
+                  usuario.avatar = data['avatar']
+
+              # Realizar la operación de actualización en la base de datos
+              Usuario.actualizar_usuario(usuario)
+
+              return jsonify(usuario.serializar()), 200
+          except Exception as e:
+              return jsonify({"message": str(e)}), 500
+      else:
+          return jsonify({"message": "Usuario no encontrado"}), 404
+
+    
+    
+    @classmethod
     def logout(cls):
         session.pop('email', None)
         return {"message": "Sesión cerrada"}, 200

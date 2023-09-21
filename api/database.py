@@ -46,3 +46,13 @@ class DatabaseConnection:
         if cls._connection is not None:
             cls._connection.close()
             cls._connection = None
+
+    @classmethod
+    def get_cursor(cls):
+        connection = cls.get_connection()
+        return connection.cursor()
+
+    @classmethod
+    def commit(cls):
+        if cls._connection is not None:
+            cls._connection.commit()

@@ -111,14 +111,9 @@ class Usuario:
         valores = (self.nombre, self.apellido, self.fecha_nacimiento, self.avatar, self.id)
 
         # Ejecutar la consulta SQL de actualización
-        cursor = DatabaseConnection.execute_query(consulta, params=valores)
-
-        # Comprobar si se realizó la actualización correctamente
-        if cursor.rowcount == 0:
-            raise Exception("No se pudo actualizar el usuario. Usuario no encontrado en la base de datos")
+        DatabaseConnection.execute_query(consulta, params=valores)
 
         # Confirmar la transacción
         DatabaseConnection.commit()
 
-        # Cerrar el cursor (importante para liberar recursos)
-        cursor.close()
+        

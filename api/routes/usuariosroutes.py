@@ -22,4 +22,4 @@ usuarios_routes.route('/servers/<int:servidor_id>/canales', methods=['POST'])(Us
 usuarios_routes.route('/servers/<int:servidor_id>/canales/<int:canal_id>/mensajes', methods=['GET'])(UsuarioController.obtener_mensajes_canal)
 usuarios_routes.route('/servers/<int:servidor_id>/canales/<int:canal_id>/mensajes', methods=['POST'])(UsuarioController.enviar_mensaje)
 usuarios_routes.route('/servers/<int:servidor_id>/canales/<int:canal_id>/mensajes/<int:mensaje_id>', methods=['DELETE'])(UsuarioController.borrar_mensaje)
-
+usuarios_routes.route('/servers/<int:servidor_id>/canales/<int:canal_id>/mensajes/<int:mensaje_id>', methods=['PUT'])(UsuarioController.modificar_mensaje)

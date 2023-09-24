@@ -4,6 +4,8 @@ from ..models.exceptions import InvalidDataError, UsuarioNotFound
 from ..models.servidoresmodels import Servidor
 from ..models.canalesmodels import Canal
 from ..models.mensajesmodels import Mensaje
+from datetime import datetime, timedelta
+
 
 class UsuarioController:
 
@@ -352,4 +354,40 @@ class UsuarioController:
                 return jsonify({"message": str(e)}), 500
         else:
             return jsonify({"message": "Usuario no encontrado"}), 404
+        
+
+    @classmethod
+    def modificar_mensaje(cls, servidor_id, canal_id, mensaje_id):
+        email = session.get('email')
+        usuario = Usuario.obtener_usuario_por_email_servidores(email=email)
+
+        if usuario:
+            try:
+                mensaje = Mensaje.obtener_mensaje_por_id(mensaje_id)
+
+                if mensaje.usuario_id == usuario.id:
+                    # Verifica si el mensaje es reciente (dentro de los últimos 60 segundos)
+                    tiempo_actual = datetime.now()
+                    tiempo_diferencia = tiempo_actual - mensaje.fecha_envio
+
+                    if tiempo_diferencia.total_seconds() <= 60:
+                        # Obtén el nuevo contenido del mensaje desde la solicitud
+                        nuevo_contenido = request.json.get('contenido')
+
+                        if nuevo_contenido:
+                            # Intenta editar el mensaje
+                            if Mensaje.editar_mensaje(mensaje_id, usuario.id, nuevo_contenido):
+                                return jsonify({"message": "Mensaje editado exitosamente"}), 200
+                            else:
+                                return jsonify({"message": "Error al editar el mensaje"}), 500
+                        else:
+                            return jsonify({"message": "Contenido del mensaje no proporcionado"}), 400
+                    else:
+                        return jsonify({"message": "El mensaje no se puede editar porque ha pasado más de 1 minuto desde que se envió"}), 403
+                else:
+                    return jsonify({"message": "No tienes permiso para editar este mensaje"}), 403
+            except Exception as e:
+                return jsonify({"message": str(e)}), 500
+        else:
+            return jsonify({"message": "Usuario no encontrado"}), 404     
 

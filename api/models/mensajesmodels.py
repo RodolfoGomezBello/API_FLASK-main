@@ -81,3 +81,36 @@ class Mensaje:
             raise Exception("No tienes permiso para borrar este mensaje")
 
 
+    @classmethod
+    def editar_mensaje(cls, mensaje_id, usuario_id, nuevo_contenido):
+        # Implementa la lógica para editar un mensaje por su ID
+        mensaje = cls.obtener_mensaje_por_id(mensaje_id)
+
+        if mensaje.usuario_id == usuario_id:
+            # Verifica si el mensaje es reciente (dentro de los últimos 60 segundos)
+            tiempo_actual = datetime.now()
+            tiempo_diferencia = tiempo_actual - mensaje.fecha_envio
+            if tiempo_diferencia.total_seconds() <= 60:
+                try:
+                    # Construir la consulta SQL de actualización
+                    consulta = "UPDATE socialchat.mensajes SET contenido = %s WHERE id_mensaje = %s"
+
+                    # Valores a actualizar en la base de datos
+                    valores = (nuevo_contenido,)
+
+                    # Ejecutar la consulta SQL de actualización
+                    DatabaseConnection.execute_query(consulta,params= valores)
+
+                    return True
+                except Exception as e:
+                    raise Exception("Error al actualizar el mensaje en la base de datos: {}".format(str(e)))
+            else:
+                raise Exception("El mensaje no se puede editar porque ha pasado más de 1 minuto desde que se envió")
+        else:
+            raise Exception("No tienes permiso para editar este mensaje")
+
+
+
+
+
+

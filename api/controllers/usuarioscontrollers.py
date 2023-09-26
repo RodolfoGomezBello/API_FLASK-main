@@ -1,6 +1,6 @@
 from ..models.usuariosmodels import Usuario #, agregar_usuario,obtener_usuario_por_email ,obtener_usuario_por_id, obtener_todos_los_usuarios, eliminar_usuario_por_id
 from flask import request, session, jsonify
-from ..models.exceptions import InvalidDataError, UsuarioNotFound
+from ..models.exceptions import InvalidDataError, UsuarioNotFound, MensajeNotFound
 from ..models.servidoresmodels import Servidor
 from ..models.canalesmodels import Canal
 from ..models.mensajesmodels import Mensaje
@@ -319,6 +319,20 @@ class UsuarioController:
         except Exception as e:
             return jsonify({"message": str(e)}), 500
 
+   
+    @classmethod
+    def obtener_mensajes_por_id(cls, servidor_id, canal_id, id_mensaje):
+        try:
+           # Implementa la lógica para obtener el contenido de un mensaje por su ID
+           contenido_mensaje = Mensaje.obtener_mensaje_por_id_edit(id_mensaje)
+           return jsonify({"contenido": contenido_mensaje}), 200
+        except MensajeNotFound as e:
+           return jsonify({"message": str(e)}), 404  # Mensaje no encontrado
+        except Exception as e:
+         return jsonify({"message": str(e)}), 500  # Otros errores internos del servidor
+    
+    
+    
     @classmethod
     def enviar_mensaje(cls, servidor_id, canal_id):
         data = request.json
@@ -358,36 +372,23 @@ class UsuarioController:
 
     @classmethod
     def modificar_mensaje(cls, servidor_id, canal_id, mensaje_id):
-        email = session.get('email')
-        usuario = Usuario.obtener_usuario_por_email_servidores(email=email)
+      email = session.get('email')
+      usuario = Usuario.obtener_usuario_por_email_servidores(email=email)
 
-        if usuario:
-            try:
-                mensaje = Mensaje.obtener_mensaje_por_id(mensaje_id)
+      if usuario:
+         try:
+             # Obtén el nuevo contenido del mensaje desde la solicitud
+             nuevo_contenido = request.json.get('contenido')
 
-                if mensaje.usuario_id == usuario.id:
-                    # Verifica si el mensaje es reciente (dentro de los últimos 60 segundos)
-                    tiempo_actual = datetime.now()
-                    tiempo_diferencia = tiempo_actual - mensaje.fecha_envio
-
-                    if tiempo_diferencia.total_seconds() <= 60:
-                        # Obtén el nuevo contenido del mensaje desde la solicitud
-                        nuevo_contenido = request.json.get('contenido')
-
-                        if nuevo_contenido:
-                            # Intenta editar el mensaje
-                            if Mensaje.editar_mensaje(mensaje_id, usuario.id, nuevo_contenido):
-                                return jsonify({"message": "Mensaje editado exitosamente"}), 200
-                            else:
-                                return jsonify({"message": "Error al editar el mensaje"}), 500
-                        else:
-                            return jsonify({"message": "Contenido del mensaje no proporcionado"}), 400
-                    else:
-                        return jsonify({"message": "El mensaje no se puede editar porque ha pasado más de 1 minuto desde que se envió"}), 403
+             if nuevo_contenido:
+                # Intenta editar el mensaje
+                if Mensaje.editar_mensaje(mensaje_id, nuevo_contenido):
+                    return jsonify({"message": "Mensaje editado exitosamente"}), 200
                 else:
-                    return jsonify({"message": "No tienes permiso para editar este mensaje"}), 403
-            except Exception as e:
-                return jsonify({"message": str(e)}), 500
-        else:
-            return jsonify({"message": "Usuario no encontrado"}), 404     
-
+                    return jsonify({"message": "Error al editar el mensaje"}), 500
+             else:
+                 return jsonify({"message": "Contenido del mensaje no proporcionado"}), 400
+         except Exception as e:
+             return jsonify({"message": str(e)}), 500
+      else:
+         return jsonify({"message": "Usuario no encontrado"}), 404

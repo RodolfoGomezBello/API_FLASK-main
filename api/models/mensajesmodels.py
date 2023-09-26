@@ -34,6 +34,19 @@ class Mensaje:
             return Mensaje(id_mensaje=mensaje[0], contenido=mensaje[1], canal_id=mensaje[2], usuario_id=mensaje[3], fecha_envio=mensaje[4])
         else:
             raise MensajeNotFound(mensaje_id)
+        
+    @classmethod
+    def obtener_mensaje_por_id_edit(cls,id_mensaje):
+        # Implementa la lógica para obtener solo el contenido para la edicion
+        consulta = "SELECT contenido FROM socialchat.mensajes WHERE id_mensaje = %s"
+        valores = (id_mensaje,)
+
+        mensaje = DatabaseConnection.fetch_one(consulta, params=valores)
+
+        if mensaje:
+            return mensaje[0]
+        else:
+            raise MensajeNotFound(id_mensaje)      
 
     @classmethod
     def obtener_mensajes_por_canal(cls, canal_id):
@@ -82,33 +95,30 @@ class Mensaje:
 
 
     @classmethod
-    def editar_mensaje(cls, mensaje_id, usuario_id, nuevo_contenido):
+    def editar_mensaje(cls, mensaje_id, nuevo_contenido):
         # Implementa la lógica para editar un mensaje por su ID
-        mensaje = cls.obtener_mensaje_por_id(mensaje_id)
-
-        if mensaje.usuario_id == usuario_id:
+        try:
             # Verifica si el mensaje es reciente (dentro de los últimos 60 segundos)
+            mensaje1=cls.obtener_mensaje_por_id(mensaje_id)
+            mensaje = cls.obtener_mensaje_por_id_edit(mensaje_id)
             tiempo_actual = datetime.now()
-            tiempo_diferencia = tiempo_actual - mensaje.fecha_envio
+            tiempo_diferencia = tiempo_actual - mensaje1.fecha_envio
+
             if tiempo_diferencia.total_seconds() <= 60:
-                try:
-                    # Construir la consulta SQL de actualización
-                    consulta = "UPDATE socialchat.mensajes SET contenido = %s WHERE id_mensaje = %s"
+                # Construir la consulta SQL de actualización
+                consulta = "UPDATE socialchat.mensajes SET contenido = %s WHERE id_mensaje = %s"
 
-                    # Valores a actualizar en la base de datos
-                    valores = (nuevo_contenido,)
+                # Valores a actualizar en la base de datos
+                valores = (nuevo_contenido, mensaje_id)
 
-                    # Ejecutar la consulta SQL de actualización
-                    DatabaseConnection.execute_query(consulta,params= valores)
+                # Ejecutar la consulta SQL de actualización
+                DatabaseConnection.execute_query(consulta, params=valores)
 
-                    return True
-                except Exception as e:
-                    raise Exception("Error al actualizar el mensaje en la base de datos: {}".format(str(e)))
+                return True
             else:
                 raise Exception("El mensaje no se puede editar porque ha pasado más de 1 minuto desde que se envió")
-        else:
-            raise Exception("No tienes permiso para editar este mensaje")
-
+        except Exception as e:
+            raise Exception("Error al actualizar el mensaje en la base de datos: {}".format(str(e)))
 
 
 

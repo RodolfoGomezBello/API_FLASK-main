@@ -5,6 +5,12 @@ from ..models.servidoresmodels import Servidor
 from ..models.canalesmodels import Canal
 from ..models.mensajesmodels import Mensaje
 from datetime import datetime, timedelta
+from config import Config
+import smtplib
+from email.mime.text import MIMEText
+from email.header import Header
+from email import encoders
+
 
 
 class UsuarioController:
@@ -78,6 +84,8 @@ class UsuarioController:
                   usuario.nombre = data['nombre']
               if 'apellido' in data:
                   usuario.apellido = data['apellido']
+              if 'contraseña' in data:
+                    usuario.contraseña = data['contraseña']
               if 'fecha_nacimiento' in data:
                   usuario.fecha_nacimiento = data['fecha_nacimiento']
               if 'avatar' in data:
@@ -135,6 +143,61 @@ class UsuarioController:
             if usuario['email'] == email:
                 return True
         return False
+    
+    @classmethod
+    def forgot_password(cls):
+        data = request.json
+        email = data.get('email')
+
+        # Recupera un usuario por su dirección de correo electrónico
+        usuario = Usuario.obtener_usuario_por_email(email)
+
+        if usuario:
+            # Genera una nueva contraseña aleatoria
+            nueva_contraseña = Usuario.generar_nueva_contraseña()
+
+            # Actualiza la contraseña del usuario en la base de datos
+            Usuario().actualizar_contraseña(email, nueva_contraseña)
+
+            # Envía la nueva contraseña por correo electrónico
+            #asunto = 'Password Recover'
+            mensaje = f'Ingresa de nuevo con: {nueva_contraseña}'
+            destinatario = email
+            print( f" {destinatario}  {mensaje}") #{asunto}   
+            if cls.enviar_correo(destinatario,  mensaje): #asunto,
+                return jsonify({'message': 'Se ha enviado una nueva contraseña por correo electrónico'}), 200
+            else:
+                return jsonify({'error': 'No se pudo enviar la nueva contraseña por correo electrónico'}), 500
+        else:
+            return jsonify({'error': 'No se encontró el usuario con el correo electrónico especificado'}), 404
+
+    @staticmethod
+    def enviar_correo(destinatario,  mensaje):#asunto,
+        try:
+            # Configurar las credenciales de correo electrónico
+            EMAIL_ADDRESS = Config.EMAIL_ADDRESS
+            EMAIL_PASSWORD = Config.EMAIL_PASSWORD
+            print(f"{EMAIL_ADDRESS}  {EMAIL_PASSWORD}")
+            # Crear un objeto MIMEText para el mensaje
+            msg = MIMEText(mensaje, _charset='utf-8')
+            #msg['Subject'] = Header('', 'utf-8').encode()
+            msg['From'] = EMAIL_ADDRESS
+            msg['To'] = destinatario
+            print(f"{msg}")
+            # Conectar al servidor SMTP
+            server = smtplib.SMTP('smtp.gmail.com', 587)
+            server.starttls()
+            server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
+
+            # Enviar el correo electrónico
+            server.sendmail(EMAIL_ADDRESS, destinatario, msg.as_string())
+
+            # Cerrar la conexión
+            server.quit()
+            return True  # Éxito en el envío del correo electrónico
+        except Exception as e:
+            print(str(e))
+            return False  # Error en el envío del correo electrónico
     
     @classmethod
     def obtener_servidores_usuario(cls):

@@ -1,4 +1,6 @@
 import json
+import random
+import string
 from collections import OrderedDict
 from ..database import DatabaseConnection
 
@@ -105,10 +107,10 @@ class Usuario:
             raise ValueError("El usuario debe tener un ID válido para actualizarlo")
 
         # Construir la consulta SQL de actualización
-        consulta = "UPDATE socialchat.usuarios SET nombre = %s, apellido = %s, fecha_nacimiento = %s, avatar = %s WHERE id = %s"
+        consulta = "UPDATE socialchat.usuarios SET nombre = %s, apellido = %s,contraseña = %s, fecha_nacimiento = %s, avatar = %s WHERE id = %s"
 
         # Valores a actualizar en la base de datos
-        valores = (self.nombre, self.apellido, self.fecha_nacimiento, self.avatar, self.id)
+        valores = (self.nombre, self.apellido,self.contraseña, self.fecha_nacimiento, self.avatar, self.id)
 
         # Ejecutar la consulta SQL de actualización
         DatabaseConnection.execute_query(consulta, params=valores)
@@ -116,4 +118,17 @@ class Usuario:
         # Confirmar la transacción
         DatabaseConnection.commit()
 
-        
+    @classmethod
+    def generar_nueva_contraseña(cls):
+        # Genera una nueva contraseña aleatoria
+        longitud = 12  # Puedes ajustar la longitud según tus necesidades
+        caracteres = string.ascii_letters + string.digits  # Letras y números
+        nueva_contraseña = ''.join(random.choice(caracteres) for _ in range(longitud))
+        return nueva_contraseña
+
+    def actualizar_contraseña(self, email, nueva_contraseña):
+        # Actualiza la contraseña del usuario en la base de datos
+        consulta = "UPDATE socialchat.usuarios SET contraseña = %s WHERE email = %s"
+        valores = (nueva_contraseña,email)
+        DatabaseConnection.execute_query(consulta, params=valores)
+        DatabaseConnection.commit()        

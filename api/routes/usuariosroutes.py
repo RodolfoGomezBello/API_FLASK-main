@@ -24,3 +24,4 @@ usuarios_routes.route('/servers/<int:servidor_id>/canales/<int:canal_id>/mensaje
 usuarios_routes.route('/servers/<int:servidor_id>/canales/<int:canal_id>/mensajes/<int:mensaje_id>', methods=['DELETE'])(UsuarioController.borrar_mensaje)
 usuarios_routes.route('/servers/<int:servidor_id>/canales/<int:canal_id>/mensajes/<int:mensaje_id>', methods=['PUT'])(UsuarioController.modificar_mensaje)
 usuarios_routes.route('/servers/<int:servidor_id>/canales/<int:canal_id>/mensajes/<int:id_mensaje>',methods=['GET'])(UsuarioController.obtener_mensajes_por_id)
+usuarios_routes.route('/forgot_password', methods=['POST'])(UsuarioController.forgot_password)

@@ -12,5 +12,10 @@ class Config:
     DATABASE_HOST = config['DATABASE_HOST']
     DATABASE_PORT = config['DATABASE_PORT']
 
+    EMAIL_ADDRESS = config['EMAIL_ADDRESS']  # Accede a la variable 'EMAIL_ADDRESS'
+    EMAIL_PASSWORD = config['EMAIL_PASSWORD']  # Accede a la variable 'EMAIL_PASSWORD'
+
+   
+
     TEMPLATE_FOLDER = "templates/"
     STATIC_FOLDER = "static_folder/"
